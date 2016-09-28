@@ -19,13 +19,10 @@ namespace VRStandardAssets.Utils
 
         private GameObject ret;
         [SerializeField]
-        private Transform m_Camera;
-        [SerializeField]
+
         private LayerMask m_ExclusionLayers;           // Layers to exclude from the raycast.
-        [SerializeField]
-        private Reticle m_Reticle;                     // The reticle, if applicable.
-        [SerializeField]
-        private VRInput m_VrInput;                     // Used to call input based events on the current VRInteractiveItem.
+                    // The reticle, if applicable.
+
         [SerializeField]
         private bool m_ShowDebugRay;                   // Optionally show the debug ray.
         [SerializeField]
@@ -40,31 +37,23 @@ namespace VRStandardAssets.Utils
 
         void Start()
         {
-            m_Camera = GetComponent<Camera>().transform;
-            m_Reticle = GetComponent<Reticle>();
-            m_VrInput = GetComponent<VRInput>();
-            sync = 8; //Set the updates refresh rate
-                      //ret.GetComponent<RectTransform>().transform;
-                      //   ret = PhotonNetwork.Instantiate("userPing", new Vector3(0, 10, 0), Quaternion.identity, 0);
 
-            //if (ret == null)
-            //{
-            //    ret = GameObject.Find("GUIReticle");
-            //  }
-            // PhotonNetwork.Destroy(ret);
+
+            sync = 8; 
+
         }
         [PunRPC]
         private void EnablePing()
         {
             isTransfering = true;
-            print("in enable ping");
+       //     print("in enable ping");
         }
         [PunRPC]
         private void DisablePing()
         {
             isTransfering = false;
           //  Destroy()
-            print("in disable ping");
+         //   print("in disable ping");
         }
 
 
@@ -72,9 +61,9 @@ namespace VRStandardAssets.Utils
         public void userPing()
         {
             if (!isTransfering)
-                photonView.RPC("EnablePing", PhotonTargets.Others);
+                photonView.RPC("EnablePing", PhotonTargets.All);
             else
-                photonView.RPC("DisablePing", PhotonTargets.Others);
+                photonView.RPC("DisablePing", PhotonTargets.All);
         }
         // Update is called once per frame
         public void Update()
@@ -83,22 +72,13 @@ namespace VRStandardAssets.Utils
             {
                 transform.rotation = Quaternion.Lerp(transform.rotation, correctPlayerRot, Time.deltaTime * sync);
                 if (isTransfering)
-                {// print(m_Reticle.transform.position);
-                    syncEndRotation = correctPlayerRot;//Quaternion.Lerp(transform.rotation, correctPlayerRot, Time.deltaTime * sync);
-                   // pingTrans.localPosition = pingPos; // Vector3.Lerp(transform.position, pingPos, Time.deltaTime * sync);
-                   // print(pingTrans);
+                {
                     rayCast();
                 }//maybe add prediction to this model
             }
-            //else
-            //{
-            //  ret.transform.position = pingPos;
-            //  rayCast();
-            //print(correctPlayerRot);
-            
-            //   }
+  
         }
-
+        
         public void rayCast()
         {
             //print("in raycast");
@@ -116,12 +96,20 @@ namespace VRStandardAssets.Utils
                 if (interactible)
                 {
                     // interactible.Over();
-                    
-                    var pos = ray.GetPoint(m_RayLength);
-                    
-                    Debug.DrawRay(m_Camera.position, m_Camera.forward * m_DebugRayLength, Color.red, m_DebugRayDuration);
 
-                    Instantiate(pingPrefab, hit.point, Quaternion.identity);
+                 //   Destroy(pingPrefab);
+                    
+                    
+                   // var pos = ray.GetPoint(m_RayLength);
+
+                    // Debug.DrawRay(m_Camera.position, m_Camera.forward * m_DebugRayLength, Color.red, m_DebugRayDuration);
+                    Quaternion normalHit = Quaternion.FromToRotation(Vector3.forward, hit.normal);
+                    //GameObject clone = (GameObject)Instantiate(pingPrefab, hit.point, normalHit);
+
+                    photonView.RPC("transferPing", PhotonTargets.Others, hit.point, normalHit);
+
+                  //  Destroy(clone, 0.1f);
+                   // m_ReticleTransform.rotation = Quaternion.FromToRotation(Vector3.forward, hit.normal);
                 }
 
                 // Something was hit, set at the hit position.
@@ -134,6 +122,15 @@ namespace VRStandardAssets.Utils
 
 
         }
+        [PunRPC]
+        public void transferPing(Vector3 pos, Quaternion forwardV)
+        {
+            //pos.Normalize();
+            pos.Scale(new Vector3 (0.99f,0.99f,0.99f));
+            GameObject clone = (GameObject)Instantiate(pingPrefab, pos, forwardV);
+            Destroy(clone, 0.1f);
+        }
+
         public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
         {
 

@@ -80,7 +80,7 @@ namespace VRStandardAssets.Utils
             {
                 GameObject go = GameObject.Find("slave_povCam2");
                 dataTransfer = go.GetComponent<DataTransferHandler>();
-                m_VrInput = go.GetComponent<VRInput>();
+             //   m_VrInput = go.GetComponent<VRInput>();
             }
             if (dataTransfer)
             {
@@ -101,7 +101,7 @@ namespace VRStandardAssets.Utils
                 //  print("in find data trans");
                 GameObject go = GameObject.Find("slave_povCam2");
                 dataTransfer = go.GetComponent<DataTransferHandler>();
-                m_VrInput = go.GetComponent<VRInput>();
+          //      m_VrInput = go.GetComponent<VRInput>();
                 //     print("go is : " + go + " data trans" + dataTransfer);
             }
             if (dataTransfer)

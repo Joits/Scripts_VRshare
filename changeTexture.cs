@@ -20,15 +20,18 @@ public class changeTexture : Photon.MonoBehaviour
     private void OnEnable()
     {
         m_VRInput.OnSwipe += HandleSwipe;
-       
-
+        
     }
 
     [PunRPC]
     private void OnDisable()
     {
         m_VRInput.OnSwipe -= HandleSwipe;
+       
     }
+
+
+
 
     public List<string> returnImageList() //list of textures public available by request :D
     {
@@ -50,6 +53,9 @@ public class changeTexture : Photon.MonoBehaviour
         else
             photonView.RPC("OnDisable", PhotonTargets.AllBuffered);
     }
+
+
+
     public void HandleSwipe(VRInput.SwipeDirection swipeDirection)
     {
         if (textures.Length == 0)
@@ -99,6 +105,7 @@ public class changeTexture : Photon.MonoBehaviour
     void Start()
     {
         //assign renderer
+        
         rend = GetComponent<Renderer>();
 
         //index for shuffling trhough the amount of textures

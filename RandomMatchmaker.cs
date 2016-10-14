@@ -2,7 +2,7 @@
 using System.Collections;
 using UnityEngine.UI;
 using System.Collections.Generic;
-
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 using UnityEngine.VR;
 public class RandomMatchmaker : Photon.PunBehaviour //notice the Photon.PunBehavior making it able to access the OnjoinedRoom, OnPhotonRandomJoinFaile and OnJoinedLobby etc.
 {
@@ -11,6 +11,7 @@ public class RandomMatchmaker : Photon.PunBehaviour //notice the Photon.PunBehav
     private Camera mainCam;
     RenderTextureHandler RenderTexHandler;
     private int index;
+    public int playerIDTransfering;
     // private string roomName;
 
     private bool spawn = false;
@@ -31,6 +32,8 @@ public class RandomMatchmaker : Photon.PunBehaviour //notice the Photon.PunBehav
     private GameObject selectedObject;
     private Color unselectedColor;
     public GameObject ServerButton;
+
+    Hashtable playerID = new Hashtable();
 
     void Start()
     {
@@ -308,7 +311,7 @@ public class RandomMatchmaker : Photon.PunBehaviour //notice the Photon.PunBehav
 
         if (PhotonNetwork.playerList.Length > 1)
         {
-            Debug.Log("two players");
+           // Debug.Log("two players");
             StartCoroutine(delay());
            
         }
@@ -340,32 +343,65 @@ public class RandomMatchmaker : Photon.PunBehaviour //notice the Photon.PunBehav
     {
 
         yield return new WaitForSeconds(0.5f); //we need a small delay else the slaveprefab wouldnt exist on both clients.
+        
 
+        if (PhotonNetwork.isMasterClient)
+        {
+            index = 999;
+            playerID["ID"] = index;
+            PhotonNetwork.player.SetCustomProperties(playerID);
+        }
         //based on how many people and when you joined, create a prefab which will handle data transfer.
         if (GameObject.Find("Slave_preFab2(Clone)") == null)
         {
             slave = PhotonNetwork.Instantiate("Slave_preFab2", new Vector3(0, 0, 0), Quaternion.identity, 0);
             index = 0;
+            playerID["ID"] = index;
+            PhotonNetwork.player.SetCustomProperties(playerID);
         }
         else if (GameObject.Find("Slave_preFab3(Clone)") == null)
         {
             slave = PhotonNetwork.Instantiate("Slave_preFab3", new Vector3(0, 0, 0), Quaternion.identity, 0);
             index = 1;
+            playerID["ID"] = index;
+            PhotonNetwork.player.SetCustomProperties(playerID);
         }
         else if (GameObject.Find("Slave_preFab4(Clone)") == null)
         {
             slave = PhotonNetwork.Instantiate("Slave_preFab4", new Vector3(0, 0, 0), Quaternion.identity, 0);
             index = 2;
+            playerID["ID"] = index;
+            PhotonNetwork.player.SetCustomProperties(playerID);
         }
         else {
             slave = PhotonNetwork.Instantiate("Slave_preFab5", new Vector3(0, 0, 0), Quaternion.identity, 0);
             index = 3;
+            playerID["ID"] = index;
+            
+            PhotonNetwork.player.SetCustomProperties(playerID);
+            
         }
         //slave = PhotonNetwork.Instantiate("Slave_preFab2", new Vector3(0, 0, 0), Quaternion.identity, 0);
-        //Debug.Log(index);
+        Debug.Log(index);
         slave.GetComponentInChildren<Camera>().cullingMask &= ~(1 << LayerMask.NameToLayer("LoginGUI"));
         photonView.RPC("okSignal", PhotonTargets.MasterClient, slave.name, index); //send signal to master about who joins
         // print(Time.time);
+    }
+
+    public void returnPlayerID()
+    {
+       photonView.RPC("returnID", PhotonTargets.All, (int)(playerID["ID"]));
+      // print(PhotonNetwork.player.customProperties["ID"].ToString());
+    }
+
+    [PunRPC] 
+    public void returnID(int ID)
+    {
+        playerIDTransfering = ID;
+       // if (PhotonNetwork.isMasterClient)
+            print(ID);
+       // playerIDTransfering = PhotonNetwork.player.customProperties["ID"].ToString();
+        //print(PhotonNetwork.player.customProperties["ID"].ToString());
     }
 
     [PunRPC]

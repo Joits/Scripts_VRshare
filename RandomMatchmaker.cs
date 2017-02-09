@@ -10,13 +10,14 @@ public class RandomMatchmaker : Photon.PunBehaviour //notice the Photon.PunBehav
     private GameObject slave;
     private Camera mainCam;
     RenderTextureHandler RenderTexHandler;
+	popupMessage warningMessage;
     private int index;
     public int playerIDTransfering;
     // private string roomName;
 
     private bool spawn = false;
     private int maxPlayer = 1;
-    
+
     private Room[] game;
     private string roomName = "DEFAULT ROOM NAME";
     bool connecting = false;
@@ -26,7 +27,7 @@ public class RandomMatchmaker : Photon.PunBehaviour //notice the Photon.PunBehav
     public string Version = "Version 1";
     private Vector3 up;
     private Vector2 scrollPosition;
-    private Transform panel;
+  //  private Transform panel;
     private List<GameObject> serverList;
     private GameObject scroll;
     private GameObject selectedObject;
@@ -37,8 +38,10 @@ public class RandomMatchmaker : Photon.PunBehaviour //notice the Photon.PunBehav
 
     void Start()
     {
-        roomName = "lol";
+
         RenderTexHandler = FindObjectOfType(typeof(RenderTextureHandler)) as RenderTextureHandler;
+		warningMessage = FindObjectOfType (typeof(popupMessage)) as popupMessage;
+		mainCam = Camera.main;
         PhotonNetwork.ConnectUsingSettings(Version);
         if (PhotonNetwork.connected == false && connecting == false)
         {
@@ -47,47 +50,18 @@ public class RandomMatchmaker : Photon.PunBehaviour //notice the Photon.PunBehav
         }
         if (PhotonNetwork.insideLobby == true)
         {
-            GameObject nameField = GameObject.Find("Name_InputField");
-           PhotonNetwork.player.name = nameField.GetComponentInChildren<Text>().text;
+            GameObject nameField = GameObject.Find("Name_InputField"); //currently not doing anything
+            PhotonNetwork.player.name = nameField.GetComponentInChildren<Text>().text;
         }
-                
+		GameObject canvasFade = GameObject.Find ("messageCanvas");
+	//	CanvasGroup Fade = canvasFade.GetComponent<Canvas> ();
+		//Fade.blocksRaycasts = false;
     }
-    
+
     // Update is called once per frame
     void Update()
     {
-        //Debug.Log("----------------------");
-        //foreach (PhotonPlayer other in PhotonNetwork.playerList)
-        //{
 
-        //    Debug.Log(other.customProperties["ID"].ToString());
-        //    int id = (int)other.customProperties["ID"];
-        //    Debug.Log(id);
-        //    Debug.Log(other.GetNext());
-        //    playerText[PhotonNetwork.playerList.Length - 2 + playerIndex].text = ("User ID " + other + " connected! | " + other.customProperties["Ping"].ToString());
-
-        //    GUILayout.Label("Player number " + pl + " connected! | " + pl.customProperties["Ping"].ToString());
-
-        //}
-
-        //PlayerCustomProps["Ping"] = PhotonNetwork.GetPing();
-        //print(PhotonNetwork.GetRoomList());
-
-
-        //PhotonNetwork.player.SetCustomProperties(PlayerCustomProps);
-        //if (PhotonNetwork.inRoom == true)
-        //{
-        //    // print("in room");
-        //    foreach (RoomInfo game in PhotonNetwork.GetRoomList())
-        //    {
-
-        //        print(game.maxPlayers.ToString());
-        //        //if (GUILayout.Button("Join Session"))
-        //        //{
-        //        //    PhotonNetwork.JoinRoom(game.name);
-        //        //}
-        //    }
-        //}
 
     }
 
@@ -96,7 +70,7 @@ public class RandomMatchmaker : Photon.PunBehaviour //notice the Photon.PunBehav
     {
         if (serverList == null)
         {
-            panel = transform.FindChild("Area/Panel");
+         //   panel = transform.FindChild("Area/Panel");
             serverList = new List<GameObject>();
             unselectedColor = new Color(171 / 255.0f, 174 / 255.0f, 182 / 255.0f, 1);
         }
@@ -108,18 +82,18 @@ public class RandomMatchmaker : Photon.PunBehaviour //notice the Photon.PunBehav
         CancelInvoke();
     }
 
-    
+
 
     public void PopulateServerList()
     {
 
-        panel = transform.FindChild("Area/Panel");
-  
+     //   panel = transform.FindChild("Area/Panel");
+
         int i = 0;
         RoomInfo[] hostData = PhotonNetwork.GetRoomList();
 
-        int selected = serverList.IndexOf(selectedObject);
-      // print ( hostData.Length.ToString());
+      //  int selected = serverList.IndexOf(selectedObject);
+        // print ( hostData.Length.ToString());
 
         //delete the serverlist
         for (int j = 0; j < serverList.Count; j++)
@@ -127,7 +101,7 @@ public class RandomMatchmaker : Photon.PunBehaviour //notice the Photon.PunBehav
             Destroy(serverList[j]);
         }
         serverList.Clear();
-        
+
         //generate a new list of buttons with available servers
         if (null != hostData)
         {
@@ -147,19 +121,10 @@ public class RandomMatchmaker : Photon.PunBehaviour //notice the Photon.PunBehav
                 //text.transform.FindChild("MapText").GetComponent<Text>().text = hostData[i].customProperties["map"].ToString();
                 //text.transform.FindChild("GMText").GetComponent<Text>().text = hostData[i].customProperties["gm"].ToString();
                 Transform t = Server.GetComponent<Transform>().transform;
-                t.Translate(new Vector3(0,0,i*20)); //=  i*20; //stupid, make it react to a scroll list style TO BE DONE (- text.transform.lossyScale.y)
+                t.Translate(new Vector3(0, 0, i * 20)); //=  i*20; //stupid, make it react to a scroll list style TO BE DONE (- text.transform.lossyScale.y)
             }
         }
-        if ((i * -25) < -290)
-        {
-         //   panel.GetComponent<RectTransform>().sizeDelta = new Vector2(400, (i * 25) + 30);
-         //   scroll.SetActive(true);
-        }
-        else
-        {
-          //  panel.GetComponent<RectTransform>().sizeDelta = new Vector2(400, 320);
-        //    scroll.SetActive(false);
-        }
+
     }
 
     public void CreateSession()
@@ -170,120 +135,45 @@ public class RandomMatchmaker : Photon.PunBehaviour //notice the Photon.PunBehav
         if (roomName != "" && maxPlayer > 0)
         {
             //  PhotonNetwork.CreateRoom(roomName, true, true, maxPlayer);
-           
+
             RoomOptions roomOptions = new RoomOptions() { IsVisible = true, MaxPlayers = 5 };
             PhotonNetwork.JoinOrCreateRoom(roomName, roomOptions, TypedLobby.Default);
-        //    print(PhotonNetwork.GetRoomList());
+            //    print(PhotonNetwork.GetRoomList());
         }
 
     }
     public void Connect()
     {
-      
+
     }
-    //void OnGUI()
-    //{
-    //    GUI.color = Color.grey;
-    //    if (PhotonNetwork.connected == false && connecting == false)
-    //    {
 
-
-    //        connecting = true;
-    //        Connect();
-
-
-    //    }
-    //    if (PhotonNetwork.connected == true && connecting == false)
-    //    {
-    //        GUILayout.BeginArea(new Rect(0, 0, Screen.width, Screen.height));
-    //        GUILayout.BeginVertical();
-    //        GUILayout.FlexibleSpace();
-
-    //        foreach (string msg in chatMessages)
-    //        {
-    //            GUILayout.Label(msg);
-    //        }
-
-    //        GUILayout.EndVertical();
-    //        GUILayout.EndArea();
-
-    //    }
-
-    //    if (PhotonNetwork.insideLobby == true)
-    //    {
-
-    //        GUI.Box(new Rect(Screen.width / 2.5f, Screen.height / 3f, 400, 550), "");
-    //        GUI.color = Color.white;
-    //        GUILayout.BeginArea(new Rect(Screen.width / 2.5f, Screen.height / 3, 400, 500));
-    //        GUI.color = Color.cyan;
-    //        GUILayout.Box("Lobby");
-    //        GUI.color = Color.white;
-
-    //        GUILayout.Label("Username: ");
-    //        PhotonNetwork.player.name = GUILayout.TextField(PhotonNetwork.player.name);
-
-    //        GUILayout.Label("Session Name:");
-    //        roomName = GUILayout.TextField(roomName);
-    //        GUILayout.Label("Max amount of players 1 - 20:");
-    //        maxPlayerString = GUILayout.TextField(maxPlayerString, 2);
-    //        if (maxPlayerString != "")
-    //        {
-
-    //            maxPlayer = int.Parse(maxPlayerString);
-
-    //            if (maxPlayer > 20) maxPlayer = 20;
-    //            if (maxPlayer == 0) maxPlayer = 1;
-    //        }
-    //        else
-    //        {
-    //            maxPlayer = 1;
-    //        }
-
-    //        if (GUILayout.Button("Create Room "))
-    //        {
-    //            if (roomName != "" && maxPlayer > 0)
-    //            {
-    //                //  PhotonNetwork.CreateRoom(roomName, true, true, maxPlayer);
-
-    //                RoomOptions roomOptions = new RoomOptions() { IsVisible = true, MaxPlayers = 5 };
-    //                PhotonNetwork.JoinOrCreateRoom(roomName, roomOptions, TypedLobby.Default);
-    //            }
-    //        }
-
-    //        GUILayout.Space(20);
-    //        GUI.color = Color.yellow;
-    //        GUILayout.Box("Sessions Open");
-    //        GUI.color = Color.red;
-    //        GUILayout.Space(20);
-
-    //        scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true, GUILayout.Width(400), GUILayout.Height(300));
-
-
-    //        foreach (RoomInfo game in PhotonNetwork.GetRoomList())
-    //        {
-    //            GUI.color = Color.green;
-    //            GUILayout.Box(game.name + " " + game.playerCount + "/" + game.maxPlayers + " " + game.visible);
-    //            if (GUILayout.Button("Join Session"))
-    //            {
-    //                PhotonNetwork.JoinRoom(game.name);
-    //            }
-    //        }
-    //        GUILayout.EndScrollView();
-    //        GUILayout.EndArea();
-    //    }
-    //}
 
     public override void OnJoinedLobby() // try to join random room
     {
         Debug.Log("In on joined lobby");
+        GameObject connectionStatus = GameObject.Find("ConnectedStatus");
+        //connectionStatus.GetComponentInChildren<Text>().text = PhotonNetwork.connectionStateDetailed.ToString();
+        if (PhotonNetwork.connected)
+        {
+            connectionStatus.GetComponent<Image>().color = new Color32(0, 255, 0, 128);
+            connectionStatus.GetComponentInChildren<Text>().text = "Connected, ready to join.";
+        }
+        else
+        {
+			connectionStatus.GetComponent<Image>().color = new Color32(245, 54, 54, 128);
+            connectionStatus.GetComponentInChildren<Text>().text = "Not connected, check internet connection and try again.";
+        }
         //  PhotonNetwork.JoinRandomRoom();
+    }
+
+    public override void OnFailedToConnectToPhoton(DisconnectCause cause)
+    {
+        GameObject connectionStatus = GameObject.Find("ConnectedStatus");
+        connectionStatus.GetComponentInChildren<Text>().text = "Can't connect, check internet connection and try again.";
     }
     void OnPhotonRandomJoinFailed() //no room? create one!!
     {
-        //   Debug.Log("Can't join random room!");
-        //RoomOptions roomOptions = new RoomOptions() { IsVisible = false, MaxPlayers = 5 };
-        //PhotonNetwork.JoinOrCreateRoom(roomName, roomOptions, TypedLobby.Default);
-        //    PhotonNetwork.CreateRoom(null); //cant have an empty call (no overloaded functions), use null instead.
+
     }
 
 
@@ -295,15 +185,15 @@ public class RandomMatchmaker : Photon.PunBehaviour //notice the Photon.PunBehav
             RenderTexHandler.resetRenderTexCall();
         }
 
-        // img[PhotonNetwork.playerList.Length - 1].texture = noUserConnectedTex;
     }
 
     public override void OnJoinedRoom()
     {
         //print("in room");
-     //   OnDisable(); // disable the invoke so it doesnt run in the background
-        mainCam = Camera.main;
+        //   OnDisable(); // disable the invoke so it doesnt run in the background
         
+
+		mainCam.cullingMask = -1;
         if (PhotonNetwork.playerList.Length == 1)
         {
             //  Debug.Log("one player");
@@ -311,9 +201,9 @@ public class RandomMatchmaker : Photon.PunBehaviour //notice the Photon.PunBehav
 
         if (PhotonNetwork.playerList.Length > 1)
         {
-           // Debug.Log("two players");
-            StartCoroutine(delay());
-           
+            // Debug.Log("two players");
+            StartCoroutine(delayConnect());
+
         }
         //go = GameObject.Find("Plane");
         if (!PhotonNetwork.isMasterClient)
@@ -339,18 +229,11 @@ public class RandomMatchmaker : Photon.PunBehaviour //notice the Photon.PunBehav
         }
 
     }
-    private IEnumerator delay()
+    private IEnumerator delayConnect()
     {
 
         yield return new WaitForSeconds(0.5f); //we need a small delay else the slaveprefab wouldnt exist on both clients.
-        
-
-        if (PhotonNetwork.isMasterClient)
-        {
-            index = 999;
-            playerID["ID"] = index;
-            PhotonNetwork.player.SetCustomProperties(playerID);
-        }
+        //mainCam = Camera.main;
         //based on how many people and when you joined, create a prefab which will handle data transfer.
         if (GameObject.Find("Slave_preFab2(Clone)") == null)
         {
@@ -377,69 +260,66 @@ public class RandomMatchmaker : Photon.PunBehaviour //notice the Photon.PunBehav
             slave = PhotonNetwork.Instantiate("Slave_preFab5", new Vector3(0, 0, 0), Quaternion.identity, 0);
             index = 3;
             playerID["ID"] = index;
-            
+
             PhotonNetwork.player.SetCustomProperties(playerID);
-            
+
         }
-        //slave = PhotonNetwork.Instantiate("Slave_preFab2", new Vector3(0, 0, 0), Quaternion.identity, 0);
-        Debug.Log(index);
+
+        slave.GetComponentInChildren<Camera>().enabled = true; 
         slave.GetComponentInChildren<Camera>().cullingMask &= ~(1 << LayerMask.NameToLayer("LoginGUI"));
+        mainCam.enabled = false;
         photonView.RPC("okSignal", PhotonTargets.MasterClient, slave.name, index); //send signal to master about who joins
-        // print(Time.time);
+        StopCoroutine(delayConnect());
+ 
     }
 
     public void returnPlayerID()
     {
-       photonView.RPC("returnID", PhotonTargets.All, (int)(playerID["ID"]));
-      // print(PhotonNetwork.player.customProperties["ID"].ToString());
+       if(PhotonNetwork.insideLobby == false) 
+        photonView.RPC("returnID", PhotonTargets.All, (int)(playerID["ID"]));
+        // print(PhotonNetwork.player.customProperties["ID"].ToString());
     }
 
-    [PunRPC] 
+    [PunRPC]
     public void returnID(int ID)
     {
-        playerIDTransfering = ID;
-       // if (PhotonNetwork.isMasterClient)
-            print(ID);
-       // playerIDTransfering = PhotonNetwork.player.customProperties["ID"].ToString();
-        //print(PhotonNetwork.player.customProperties["ID"].ToString());
+        playerIDTransfering = ID; //set player ID to a variable which is public
     }
 
     [PunRPC]
     public void okSignal(string signal, int ind)
     {
-        //Debug.Log("in RPC okSignal");
-        //string preFabCheck = ("Slave_preFab" + PhotonNetwork.playerList.Length +"(Clone)");
-        //GameObject slavePreFab = GameObject.Find(preFabCheck);
-
-        //if (slavePreFab != null)
-        //{
-        //    int k = 2;
-        //    while (slavePreFab != null | k <= 4)
-        //    {
-        //        preFabCheck = ("Slave_preFab" + k + "(Clone)");
-        //        slavePreFab = GameObject.Find(preFabCheck);
-        //        if (slavePreFab != null)
-        //        {
-        //            break;
-        //        }
-        //        k++;
-        //        Debug.Log(slavePreFab);
-        //    }
-        //}
-        //Debug.Log(preFabCheck);
-        //  Debug.Log("signal er" + signal + " index er: " + ind);
-
-
         RenderTexHandler.createRenderMat(signal, ind); //create a new render material based on who joins
-
-
-        // RenderTexHandler.createRenderMat(preFabCheck);
     }
 
-    public override void OnPhotonPlayerConnected(PhotonPlayer other)
+	public void OnDisconnectedFromPhoton (){
+		Debug.Log("Lost connection from photon, reconnect");
+		InvokeRepeating("PopulateServerList", 3, 2);
+
+		mainCam.enabled = true;
+		warningMessage.popUpMessage("Lost connection to the server... Please try to reconnect to the Internet.");
+
+	}
+
+
+	// The master has disconnected, leave room and return to server list.
+	void OnMasterClientSwitched( PhotonPlayer newMaster )
+	{
+		Debug.Log("The old masterclient left, we have a new masterclient: " + newMaster);
+		InvokeRepeating("PopulateServerList", 3, 2);
+		mainCam.enabled = true;
+		warningMessage.popUpMessage("Session leader disconnected.. please wait and reconnect to a new server");
+
+		PhotonNetwork.LeaveRoom (); 
+
+	}
+
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
-
-
+        //need this in order to avoid an error.
     }
+
+
+
 
 }

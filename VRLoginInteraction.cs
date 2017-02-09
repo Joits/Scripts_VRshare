@@ -33,7 +33,7 @@ namespace VRStandardAssets.Utils
         {
             if (reticle == null)
             {
-                reticle = GameObject.Find("reticle sprite");
+              //  reticle = GameObject.Find("reticle sprite");
             }
 
 

@@ -4,8 +4,17 @@ using System.Collections;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using System.Collections.Generic;
 
+/* 
+Function which handles the main UI Which the master will see.
+Reset when a user leaves and joins
+update the latency information from the users
+*/
+
+
+
 public class RenderTextureHandler : Photon.PunBehaviour
 {
+
     private RenderTexture rt;
     public Texture noUserConnectedTex;
     public RawImage[] img;
@@ -13,23 +22,22 @@ public class RenderTextureHandler : Photon.PunBehaviour
     Hashtable PlayerCustomProps = new Hashtable();
     public Text[] playerText;
     public Text masterConnectionStatus;
-
-
-    float secsToNext = 0.0f;
+    float secsToNext;
 
     void Start()
     {
-
+        secsToNext = 0.0f;
     }
     void Update()
     {
+        //get the current connection status and display in the main GUI
         if (PhotonNetwork.isMasterClient)
         {
             masterConnectionStatus.text = "Connection status: " + PhotonNetwork.connectionStateDetailed.ToString();
         }
 
+        //update the user latency every two seconds
         secsToNext -= Time.deltaTime;  // T.dt is secs since last update
-       
         if (secsToNext <= 0)
         {
             updatePing();
@@ -37,7 +45,7 @@ public class RenderTextureHandler : Photon.PunBehaviour
         }
 
     }
-
+    
     private void updatePing()
     {
         PlayerCustomProps["Ping"] = PhotonNetwork.GetPing();
@@ -78,15 +86,6 @@ public class RenderTextureHandler : Photon.PunBehaviour
 
     private void resetRenderTex()
     {
-        //if (img[PhotonNetwork.playerList.Length].texture == noUserConnectedTex)
-        //{
-        //    Debug.Log(PhotonNetwork.playerList.Length);
-        //    img[PhotonNetwork.playerList.Length - 1].texture = noUserConnectedTex;
-        //    playerText[PhotonNetwork.playerList.Length - 1].text = "";
-
-        //}
-        //else
-        //{
 
         int k = 2;
         foreach (RawImage renderTex in img)
@@ -104,7 +103,7 @@ public class RenderTextureHandler : Photon.PunBehaviour
             else {
                 slavePreFab.GetComponentInChildren<Camera>().cullingMask &= ~(1 << LayerMask.NameToLayer("LoginGUI"));
                 rt = slavePreFab.GetComponentInChildren<Camera>().targetTexture;
-                
+
                 playerText[k - 2].text = ("User # " + (k - 1) + " connected!");
                 // Debug.Log(playerText[k - 2]);
                 renderTex.texture = rt;
@@ -112,7 +111,7 @@ public class RenderTextureHandler : Photon.PunBehaviour
             k++;
         }
 
-
+        StopAllCoroutines();
     }
     public void resetRenderTexCall()
     {
@@ -120,10 +119,8 @@ public class RenderTextureHandler : Photon.PunBehaviour
     }
     private IEnumerator delay(float t)
     {
-        //  print(Time.time);
         yield return new WaitForSeconds(t);
         resetRenderTex();
-        // print(Time.time);
     }
 
     public void createRenderMat(string slave, int index)
@@ -139,6 +136,8 @@ public class RenderTextureHandler : Photon.PunBehaviour
         // Debug.Log(slave);
         GameObject slavePreFab = GameObject.Find(slave);
         // Debug.Log(index);
+
+        slavePreFab.GetComponentInChildren<Camera>().enabled = true;
         slavePreFab.GetComponentInChildren<Camera>().targetTexture = rt;
 
         //logic for assigning the rendertextures in the the main view
@@ -154,6 +153,9 @@ public class RenderTextureHandler : Photon.PunBehaviour
             img[index].texture = rt;
         }
 
+
+
     }
+
 
 }

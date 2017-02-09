@@ -3,8 +3,7 @@ using UnityEngine.VR;
 
 public class VRMouseLook : MonoBehaviour
 {
-
-#if UNITY_EDITOR
+//#if UNITY_EDITOR
 
     public bool enableYaw = true;
     public bool autoRecenterPitch = true;
@@ -78,6 +77,6 @@ public class VRMouseLook : MonoBehaviour
     }
 
 
-#endif
+//#endif
 }
 

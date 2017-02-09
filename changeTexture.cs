@@ -9,8 +9,21 @@ public class changeTexture : Photon.MonoBehaviour
     private VRInput m_VRInput; //the VR input which is the camera
     [SerializeField]
     private GameObject m_projectionSphere; //the game object which is the interactive part and need textures to be changed.
-   
-    public Texture[] textures; //texture array. set this to the amount of pictures in the inspector and load them in the different slots.
+   	
+
+
+	[System.Serializable]
+	public struct rowData
+	{
+		[Header("Base image i.e. the spherical image, load here.")]
+		public Texture mainTex;
+		[Header("If there are any channels associated with the main texture load them here:")]
+		[SerializeField] public Texture[] channels;
+	}
+	//public rowData[] columns = new rowData[8];
+
+	public rowData[] imagesToLoad;
+	public Texture[] textures; //texture array. set this to the amount of pictures in the inspector and load them in the different slots.
     private Renderer rend;
 
     private int index;
@@ -20,7 +33,7 @@ public class changeTexture : Photon.MonoBehaviour
     private void OnEnable()
     {
         m_VRInput.OnSwipe += HandleSwipe;
-        
+      
     }
 
     [PunRPC]
@@ -37,11 +50,19 @@ public class changeTexture : Photon.MonoBehaviour
     {
         List<string> imageList = new List<string>();
 
-        foreach (Texture txt in textures)
-        {
-            imageList.Add(txt.name);
-        }
+//        foreach (Texture txt in textures)
+//        {
+//            imageList.Add(txt.name);
+//        }
+//		foreach (Texture txt in imagesToLoad)
+//		{
+//			imageList.Add(txt.name);
+//		}
 
+		for (int i = 0; i < imagesToLoad.Length; i++) 
+		{
+			imageList.Add(imagesToLoad[i].mainTex.name);
+		}
         return imageList;
 
     }
@@ -53,7 +74,7 @@ public class changeTexture : Photon.MonoBehaviour
         else
             photonView.RPC("OnDisable", PhotonTargets.AllBuffered);
     }
-
+    
 
 
     public void HandleSwipe(VRInput.SwipeDirection swipeDirection)
@@ -62,9 +83,11 @@ public class changeTexture : Photon.MonoBehaviour
         {
             Debug.Log("no textures assigned to the sphere");//if there are no textures assigned, break.
             return;
+            
         }
         switch (swipeDirection)
         {
+
             case VRInput.SwipeDirection.NONE:
                 break;
             case VRInput.SwipeDirection.UP:
@@ -97,7 +120,8 @@ public class changeTexture : Photon.MonoBehaviour
     public void changeTextureRPC(int newIndex)
     {
        //send information about the new texture index to all cllients
-        rend.material.mainTexture = textures[newIndex];
+     // rend.material.mainTexture = textures[newIndex];
+		rend.material.mainTexture = imagesToLoad[newIndex].mainTex;
     
     }
 
@@ -111,9 +135,12 @@ public class changeTexture : Photon.MonoBehaviour
         //index for shuffling trhough the amount of textures
         index = 0;
 
-        rend.material.mainTexture = textures[0];
+        //rend.material.mainTexture = textures[0];
    
     }
-
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        //need this in order to avoid an error.
+    }
 }
 

@@ -294,7 +294,7 @@ public class RandomMatchmaker : Photon.PunBehaviour //notice the Photon.PunBehav
 
 	public void OnDisconnectedFromPhoton (){
 		Debug.Log("Lost connection from photon, reconnect");
-		InvokeRepeating("PopulateServerList", 3, 2);
+		InvokeRepeating("PopulateServerList", 3, 2); //doesnt actually work!?
 
 		mainCam.enabled = true;
 		warningMessage.popUpMessage("Lost connection to the server... Please try to reconnect to the Internet.");
@@ -306,7 +306,7 @@ public class RandomMatchmaker : Photon.PunBehaviour //notice the Photon.PunBehav
 	void OnMasterClientSwitched( PhotonPlayer newMaster )
 	{
 		Debug.Log("The old masterclient left, we have a new masterclient: " + newMaster);
-		InvokeRepeating("PopulateServerList", 3, 2);
+		InvokeRepeating("PopulateServerList", 3, 2); 
 		mainCam.enabled = true;
 		warningMessage.popUpMessage("Session leader disconnected.. please wait and reconnect to a new server");
 
